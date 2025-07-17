@@ -1,0 +1,38 @@
+CREATE DATABASE findy_settings;
+
+USE findy_settings;
+
+CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario VARCHAR(50) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    telegram VARCHAR(50),
+    data_expira DATE,
+    block TINYINT(1) DEFAULT 0,
+    ultimo_ip VARCHAR(45)
+);
+
+DELIMITER $$
+CREATE PROCEDURE criar_usuario(
+    IN p_usuario VARCHAR(50),
+    IN p_senha VARCHAR(255),
+    IN p_telegram VARCHAR(50),
+    IN p_dias INT,
+    IN p_ultimo_ip VARCHAR(45)
+)
+BEGIN
+    INSERT INTO usuarios (usuario, senha, telegram, data_expira, ultimo_ip)
+    VALUES (
+        p_usuario,
+        SHA2(p_senha, 256),
+        p_telegram,
+        DATE_ADD(CURDATE(), INTERVAL p_dias DAY),
+        p_ultimo_ip
+    );
+END $$
+DELIMITER ;
+
+-- Exemplos de planos: 1, 3, 7, 15, 30 dias
+CALL criar_usuario('user1', 'senha123', '@user1', 30, '192.168.1.1');
+
+SELECT * FROM usuarios;
